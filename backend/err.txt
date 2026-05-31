@@ -1,0 +1,1 @@
+src/controllers/oid4vpController.ts(245,50): error TS2339: Property 'verifyAuthorizationResponseByState' does not exist on type '{ startVerification(): Promise<StartVerificationResult>; getVerificationResult(sessionId: string): Promise<VerificationResultData>; ... 6 more ...; markExpired(sessionId: string): Promise<...>; }'.

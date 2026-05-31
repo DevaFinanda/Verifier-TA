@@ -1,0 +1,176 @@
+# /etc/nginx/sites-available/verifier.identia.my.id
+# Verifier OID4VP - Nginx Reverse Proxy
+# Cloudflare SSL: Full | Frontend: 3004 | Backend API: 3002
+
+# ── Upstream Definitions ──────────────────────────────────────
+upstream verifier_backend {
+    server 127.0.0.1:3002;
+    keepalive 32;
+}
+
+upstream verifier_frontend {
+    server 127.0.0.1:3003;
+    keepalive 32;
+}
+
+# ── Server Block ──────────────────────────────────────────────
+server {
+    listen 80;
+    server_name verifier.identia.my.id;
+
+    # ── Cloudflare Real IP Restoration ───────────────────────
+    # IPv4 ranges (ref: https://www.cloudflare.com/ips/)
+    set_real_ip_from 103.21.244.0/22;
+    set_real_ip_from 103.22.200.0/22;
+    set_real_ip_from 103.31.4.0/22;
+    set_real_ip_from 104.16.0.0/13;
+    set_real_ip_from 104.24.0.0/14;
+    set_real_ip_from 108.162.192.0/18;
+    set_real_ip_from 131.0.72.0/22;
+    set_real_ip_from 141.101.64.0/18;
+    set_real_ip_from 162.158.0.0/15;
+    set_real_ip_from 172.64.0.0/13;
+    set_real_ip_from 173.245.48.0/20;
+    set_real_ip_from 188.114.96.0/20;
+    set_real_ip_from 190.93.240.0/20;
+    set_real_ip_from 197.234.240.0/22;
+    set_real_ip_from 198.41.128.0/17;
+    # IPv6 ranges
+    set_real_ip_from 2400:cb00::/32;
+    set_real_ip_from 2606:4700::/32;
+    set_real_ip_from 2803:f800::/32;
+    set_real_ip_from 2405:b500::/32;
+    set_real_ip_from 2405:8100::/32;
+    set_real_ip_from 2a06:98c0::/29;
+    set_real_ip_from 2c0f:f248::/32;
+    real_ip_header CF-Connecting-IP;
+
+    # ── Gzip Compression ─────────────────────────────────────
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/json
+        application/javascript
+        application/xml+rss
+        application/atom+xml
+        image/svg+xml;
+
+    # ── 1. ACME Challenge (Let's Encrypt / Certbot) ───────────
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    # ── 2. DID Document & OID4VP Well-Known -> Backend ───────
+    location /.well-known/ {
+        proxy_pass         http://verifier_backend;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+        add_header         Content-Type application/did+ld+json;
+        add_header         Access-Control-Allow-Origin *;
+        add_header         Cache-Control no-cache;
+    }
+
+    # ── 3. OID4VP Protocol Endpoints -> Backend ──────────────
+    location /oid4vp/ {
+        proxy_pass         http://verifier_backend;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade           $http_upgrade;
+        proxy_set_header   Connection        "upgrade";
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_set_header   X-Forwarded-Host  $host;
+        proxy_hide_header  X-Powered-By;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout    86400s;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout    60s;
+        proxy_buffering       off;
+        client_max_body_size  10m;
+    }
+
+    # ── 4. Backend REST API -> port 3002 ──────────────────────
+    # Backend Express pakai prefix /api/ -> JANGAN strip path
+    location /api/ {
+        proxy_pass         http://verifier_backend;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade           $http_upgrade;
+        proxy_set_header   Connection        "upgrade";
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_set_header   X-Forwarded-Host  $host;
+        proxy_hide_header  X-Powered-By;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout    86400s;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout    60s;
+        proxy_buffering       off;
+        client_max_body_size  10m;
+    }
+
+    # ── 5. Health Check -> Backend ────────────────────────────
+    location /health {
+        proxy_pass         http://verifier_backend;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_read_timeout 10s;
+    }
+
+    # ── 6. Next.js Static Immutable Assets ───────────────────
+    location ~* ^/_next/static/ {
+        proxy_pass         http://verifier_frontend;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+        expires             1y;
+        add_header          Cache-Control "public, immutable";
+        access_log          off;
+    }
+
+    # ── 7. Static File Caching ────────────────────────────────
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|webp|avif)$ {
+        proxy_pass         http://verifier_frontend;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+        expires             7d;
+        add_header          Cache-Control "public, must-revalidate";
+        access_log          off;
+    }
+
+    # ── 8. Frontend Next.js -> port 3004 ─────────────────────
+    location / {
+        proxy_pass         http://verifier_frontend;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade           $http_upgrade;
+        proxy_set_header   Connection        "upgrade";
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_set_header   X-Forwarded-Host  $host;
+        proxy_hide_header  X-Powered-By;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout    86400s;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout    60s;
+    }
+}

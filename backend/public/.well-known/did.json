@@ -1,0 +1,26 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "id": "did:web:verifier.identia.my.id",
+  "verificationMethod": [
+    {
+      "id": "did:web:verifier.identia.my.id#key-1",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:verifier.identia.my.id",
+      "publicKeyJwk": {
+        "kty": "OKP",
+        "kid": "3476603d-596e-4613-b9e9-3c2af8fbd04f",
+        "crv": "Ed25519",
+        "x": "Du1qHmYJKwUoPZbNTik1NVOuAoEfJsKSwVThAjHqUWk"
+      }
+    }
+  ],
+  "authentication": [
+    "did:web:verifier.identia.my.id#key-1"
+  ],
+  "assertionMethod": [
+    "did:web:verifier.identia.my.id#key-1"
+  ]
+}
