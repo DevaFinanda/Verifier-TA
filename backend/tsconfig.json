@@ -14,12 +14,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "moduleResolution": "bundler",
-    "noEmit": true,
-    "ignoreDeprecations": "6.0",
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"]
-    }
+    "noEmit": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],

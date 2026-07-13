@@ -141,6 +141,48 @@ export const oid4vpController = {
   },
 
   /**
+   * DELETE /api/verify/sessions/:sessionId
+   * Delete a verification session from history.
+   */
+  async deleteSession(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const sessionId = req.params.sessionId as string;
+
+      if (!sessionId) {
+        throw new AppError('Session ID is required', 400, 'BAD_REQUEST');
+      }
+
+      if (!isUuid(sessionId)) {
+        throw new AppError('Session ID format is invalid', 400, 'BAD_REQUEST');
+      }
+
+      const deleted = await oid4vpService.deleteSession(sessionId);
+
+      if (!deleted) {
+        throw new AppError('Verification session not found', 404);
+      }
+
+      res.json({
+        success: true,
+        message: 'Verification session deleted',
+        data: {
+          sessionId,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Verification session not found') {
+        next(new AppError('Verification session not found', 404));
+      } else {
+        next(error);
+      }
+    }
+  },
+
+  /**
    * GET /api/verify/info
    * Get verifier configuration info.
    */

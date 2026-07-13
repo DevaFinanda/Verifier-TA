@@ -15,8 +15,9 @@ import {
   User,
   CalendarDays,
   Key,
+  Trash2,
 } from 'lucide-react';
-import { getSessions, VerificationSession } from '@/services/verifierApi';
+import { deleteSession, getSessions, VerificationSession } from '@/services/verifierApi';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -116,6 +117,7 @@ export function VerificationHistory() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const LIMIT = 10;
 
@@ -128,8 +130,10 @@ export function VerificationHistory() {
       setTotal(result.total);
       setPage(result.page);
       setTotalPages(result.totalPages);
+      return result;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Gagal memuat riwayat verifikasi');
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -138,6 +142,27 @@ export function VerificationHistory() {
   useEffect(() => {
     load(1);
   }, [load]);
+
+  async function handleDelete(sessionId: string) {
+    const confirmed = window.confirm('Hapus sesi riwayat verifikasi ini? Aksi ini tidak bisa dibatalkan.');
+    if (!confirmed) return;
+
+    setDeletingId(sessionId);
+    try {
+      await deleteSession(sessionId);
+
+      setExpandedId((current) => (current === sessionId ? null : current));
+
+      const result = await load(page);
+      if (result && result.sessions.length === 0 && page > 1) {
+        await load(page - 1);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal menghapus sesi verifikasi');
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const successCount = sessions.filter((s) => s.status === 'SUCCESS').length;
   const failedCount = sessions.filter((s) => s.status === 'FAILED').length;
@@ -255,6 +280,21 @@ export function VerificationHistory() {
                   {/* Expanded detail */}
                   {isExpanded && (
                     <div className="mt-4 pt-4 border-t border-border/50 space-y-3">
+                      <div className="flex justify-end">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleDelete(session.id);
+                          }}
+                          disabled={deletingId === session.id || isLoading}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1.5" />
+                          {deletingId === session.id ? 'Menghapus...' : 'Hapus sesi'}
+                        </Button>
+                      </div>
+
                       {/* Session ID */}
                       <div className="flex items-start gap-2 text-xs">
                         <Key className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />

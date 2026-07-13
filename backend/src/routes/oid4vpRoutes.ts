@@ -46,6 +46,13 @@ router.get('/result/:sessionId', pollLimiter, oid4vpController.getResult);
 router.get('/sessions', optionalAuth, oid4vpController.getSessions);
 
 /**
+ * @route   DELETE /api/verify/sessions/:sessionId
+ * @desc    Delete a verification session from history
+ * @access  Private
+ */
+router.delete('/sessions/:sessionId', optionalAuth, oid4vpController.deleteSession);
+
+/**
  * @route   GET /api/verify/info
  * @desc    Get verifier configuration info
  * @access  Public

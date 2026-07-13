@@ -611,6 +611,18 @@ export const oid4vpService = {
   },
 
   /**
+   * Delete a verification session from history.
+   */
+  async deleteSession(sessionId: string): Promise<boolean> {
+    const result = await query(
+      'DELETE FROM verification_sessions WHERE id = $1 RETURNING id',
+      [sessionId]
+    );
+
+    return result.rows.length > 0;
+  },
+
+  /**
    * Save verification result to the legacy verification_logs table.
    */
   async saveToVerificationLog(

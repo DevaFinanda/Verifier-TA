@@ -368,3 +368,24 @@ export async function getSessions(
   const json = await response.json();
   return (json?.data ?? json) as SessionsResponse;
 }
+
+/**
+ * Delete a verification session from history.
+ */
+export async function deleteSession(sessionId: string): Promise<void> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const response = await fetch(`${API_BASE_URL}/api/verify/sessions/${sessionId}`, {
+    method: 'DELETE',
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new VerifierApiError(
+      `Failed to delete session: ${response.statusText}`,
+      response.status,
+    );
+  }
+}

@@ -260,6 +260,12 @@ export function mountCredoApp(credoApp: import('express').Express): void {
           const vpToken = typeof body.vp_token === 'string' ? body.vp_token : null;
           const presentationSubmission = body.presentation_submission;
 
+          if (vpToken) {
+            console.log('[OID4VP_SUBMIT]');
+            console.log(vpToken);
+            console.log('[/OID4VP_SUBMIT]');
+          }
+
           if (!state || !vpToken) {
             return sendError(
               res,
