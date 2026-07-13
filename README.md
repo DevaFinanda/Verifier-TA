@@ -1,16 +1,5 @@
 # IDentia Verifier
 
-> Layanan **Verifier** untuk ekosistem identitas terdesentralisasi **IDentia**. Aplikasi ini meminta dan memverifikasi **Verifiable Presentations** dari dompet pengguna melalui alur **OID4VP**, dengan studi kasus verifikasi identitas di lingkungan **rumah sakit**.
-
-[![TypeScript](https://img.shields.io/badge/TypeScript-98%25-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org)
-[![PM2](https://img.shields.io/badge/PM2-Process%20Manager-2B037A?logo=pm2&logoColor=white)](https://pm2.keymetrics.io)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
----
-
-## Deskripsi
-
 **IDentia Verifier** adalah komponen *Relying Party* dalam ekosistem identitas terdesentralisasi. Verifier bertugas meminta presentasi kredensial (**Verifiable Presentation / VP**) dari dompet pengguna (aplikasi IDentia), lalu memvalidasi keaslian dan integritasnya menggunakan tanda tangan digital **Ed25519** serta identitas terdesentralisasi **DID:JWK**.
 
 Proyek ini terdiri dari dua bagian utama:
@@ -22,12 +11,12 @@ Proyek ini terdiri dari dua bagian utama:
 
 ## Fitur Utama
 
-- 🔎 **Permintaan presentasi (OID4VP)** — membuat *Presentation Request* dan menampilkan QR code / deep link untuk dompet pengguna.
-- ✅ **Verifikasi Verifiable Presentation** — memvalidasi tanda tangan **JWT VP/VC** menggunakan **Ed25519 (EdDSA)**.
-- 🆔 **Resolusi DID:JWK** — mengekstrak kunci publik dari identitas terdesentralisasi untuk verifikasi.
-- 🏥 **Dashboard petugas** — antarmuka web untuk memulai verifikasi dan meninjau status kredensial pasien/pengunjung.
-- 🔐 **Autentikasi operator** — login untuk mengakses dashboard Verifier.
-- ⚙️ **Manajemen proses dengan PM2** — konfigurasi deployment produksi (`pm2_info.json`).
+- **Permintaan presentasi (OID4VP)** — membuat *Presentation Request* dan menampilkan QR code / deep link untuk dompet pengguna.
+- **Verifikasi Verifiable Presentation** — memvalidasi tanda tangan **JWT VP/VC** menggunakan **Ed25519 (EdDSA)**.
+- **Resolusi DID:JWK** — mengekstrak kunci publik dari identitas terdesentralisasi untuk verifikasi.
+- **Dashboard petugas** — antarmuka web untuk memulai verifikasi dan meninjau status kredensial pasien/pengunjung.
+- **Autentikasi operator** — login untuk mengakses dashboard Verifier.
+- **Manajemen proses dengan PM2** — konfigurasi deployment produksi (`pm2_info.json`).
 
 ---
 
@@ -52,7 +41,7 @@ Proyek ini terdiri dari dua bagian utama:
   - `backend/` — API dan logika verifikasi OID4VP
   - `frontend1/` — antarmuka web dashboard Verifier
 
-### Alur Verifikasi (ringkas)
+### Alur Verifikasi 
 
 ```
   Dompet IDentia  ──(OID4VP: kirim VP)──▶  Verifier (backend)
@@ -117,7 +106,7 @@ Sesuaikan variabel lingkungan sesuai kebutuhan. Detail lengkap tersedia pada ber
 Contoh konfigurasi endpoint Verifier:
 
 ```env
-VERIFIER_BASE_URL=https://verifier.identia.my.id
+VERIFIER_BASE_URL=https://verifier.identia.<sub domain>
 PORT=3000
 ```
 
@@ -154,29 +143,3 @@ Verifier-TA/
 ```
 
 ---
-
-## Deployment
-
-Domain produksi: **https://verifier.identia.my.id**
-
-Berkas konfigurasi terkait deployment tersedia di repositori (mis. `verifier.identia.my.id.conf` untuk konfigurasi reverse proxy/web server, dan arsip `verifier-backend-redeploy-*` untuk paket redeploy).
-
----
-
-## Kontribusi
-
-1. Fork repositori ini
-2. Buat branch fitur (`git checkout -b fitur/nama-fitur`)
-3. Commit perubahan Anda (`git commit -m 'Menambahkan fitur X'`)
-4. Push ke branch (`git push origin fitur/nama-fitur`)
-5. Buka Pull Request
-
----
-
-## Lisensi
-
-Distribusikan di bawah lisensi MIT. Lihat berkas `LICENSE` untuk detail.
-
----
-
-<p align="center">Bagian dari ekosistem <strong>IDentia</strong> — Decentralized Identity & Verifiable Credentials</p>
