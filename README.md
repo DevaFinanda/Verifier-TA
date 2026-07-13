@@ -123,7 +123,7 @@ Gunakan kredensial berikut untuk masuk ke dashboard Verifier:
 | **Username / Email** | `admin@rumahsakit.com` |
 | **Password** | `password123` |
 
-> ⚠️ **Penting:** kredensial di atas adalah akun default untuk pengembangan/demo. **Segera ganti password** dan jangan gunakan kredensial ini di lingkungan produksi.
+> **Catatan:** kredensial di atas adalah akun default untuk pengembangan/demo. **Segera ganti password** dan jangan gunakan kredensial ini di lingkungan produksi.
 
 ---
 
